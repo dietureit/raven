@@ -5,6 +5,7 @@ from frappe import _
 from frappe.query_builder import Order
 
 from raven.utils import track_channel_visit
+from raven.utils.mobile_compat import sanitize_messages_for_mobile
 
 
 @frappe.whitelist()
@@ -81,7 +82,7 @@ def get_messages(channel_id: str, limit: int = 20, base_message: str | None = No
 
 	track_channel_visit(channel_id=channel_id, commit=True)
 	return {
-		"messages": messages,
+		"messages": sanitize_messages_for_mobile(messages),
 		"has_old_messages": has_old_messages,
 		"has_new_messages": False,
 	}
@@ -100,7 +101,9 @@ def get_messages_around_base(channel_id: str, base_message: str):
 		channel_id, base_message, from_timestamp, 10, include_from_message=True
 	)
 
-	combined_messages = newer_messages.get("messages", []) + older_messages.get("messages", [])
+	combined_messages = sanitize_messages_for_mobile(
+		newer_messages.get("messages", []) + older_messages.get("messages", [])
+	)
 
 	return {
 		**older_messages,
@@ -195,7 +198,7 @@ def fetch_older_messages(
 		if len(older_message) > 0:
 			has_old_messages = True
 
-	return {"messages": messages, "has_old_messages": has_old_messages}
+	return {"messages": sanitize_messages_for_mobile(messages), "has_old_messages": has_old_messages}
 
 
 @frappe.whitelist()
@@ -306,4 +309,7 @@ def fetch_newer_messages(
 
 	# The messages are in ascending order, so reverse them
 	messages.reverse()
-	return {"messages": messages, "has_new_messages": has_new_messages}
+	return {
+		"messages": sanitize_messages_for_mobile(messages),
+		"has_new_messages": has_new_messages,
+	}

@@ -40,18 +40,19 @@ const ReactionAnalyticsContent = ({ reactions }: { reactions: ReactionObject[] }
     const tabIndicatorAnim = useSharedValue(0);
 
     const all_reacted_members = useMemo(() => {
-        return reactions.flatMap(({ reaction, users, is_custom, emoji_name }: ReactionObject) =>
-            users.map((user: string) => ({ user, reaction, is_custom, emoji_name }))
-        );
+        return reactions.flatMap(({ reaction, users, is_custom, emoji_name }: ReactionObject) => {
+            const reactedUsers = Array.isArray(users) ? users : []
+            return reactedUsers.map((user: string) => ({ user, reaction, is_custom, emoji_name }))
+        });
     }, [reactions]);
 
     const tabs = useMemo(() => {
         const reactionTabs = reactions.map((r) => {
-
+            const reactedUsers = Array.isArray(r.users) ? r.users : []
             return {
                 title: r.reaction,
                 is_custom: r.is_custom,
-                users: r.users.map((user: string) => ({
+                users: reactedUsers.map((user: string) => ({
                     user,
                     reaction: r.reaction,
                     is_custom: r.is_custom,
