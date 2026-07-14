@@ -151,11 +151,15 @@ class RavenChannelMember(Document):
 
 	def check_if_user_is_member(self):
 		is_member = True
-		channel = frappe.db.get_value("Raven Channel", self.channel_id, ["type", "owner"], as_dict=True)
+		channel_fields = ["type"]
+		if frappe.db.has_column("Raven Channel", "owner"):
+			channel_fields.append("owner")
+
+		channel = frappe.db.get_value("Raven Channel", self.channel_id, channel_fields, as_dict=True)
 		if channel.type == "Private":
 			# A user can only add members to a private channel if they are themselves member of the channel or if they are the owner of a new channel
 			if (
-				channel.owner == frappe.session.user
+				channel.get("owner") == frappe.session.user
 				and frappe.db.count("Raven Channel Member", {"channel_id": self.channel_id}) == 0
 			):
 				# User is the owner of a channel and there are no members in the channel

@@ -391,15 +391,20 @@ def raven_channel_query(user):
 	if not user:
 		user = frappe.session.user
 
-	"""
-      Only show channels that the user is a owner of
+	escaped_user = frappe.db.escape(user)
 
-      We could also remove "Raven User" from the Raven Channel doctype role, but then permission checks for joining socket rooms for the channel would fail
+	# Used when desk list views join linked Raven Channel rows (e.g. Raven Message list).
+	# Do not rely only on `owner` — some sites are missing that column on Raven Channel.
+	member_channels = (
+		f"`tabRaven Channel`.name IN ("
+		f"SELECT `channel_id` FROM `tabRaven Channel Member` WHERE `user_id` = {escaped_user}"
+		f")"
+	)
 
-      Hence, we are adding a WHERE clause to the query - this is inconsequential since we will never use the standard get_list query for Raven Channel,
-      but needed for security since we do not want users to be able to view channels they are not a member of
-    """
-	return f"`tabRaven Channel`.owner = {frappe.db.escape(user)}"
+	if frappe.db.has_column("Raven Channel", "owner"):
+		return f"({member_channels} OR `tabRaven Channel`.owner = {escaped_user})"
+
+	return member_channels
 
 
 def raven_message_query(user):
