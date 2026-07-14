@@ -18,6 +18,16 @@ import { Divider } from '@components/layout/Divider';
 import { useColorScheme } from '@hooks/useColorScheme';
 import useSiteContext from '@hooks/useSiteContext';
 
+const formatPreviewFieldValue = (value: unknown): string => {
+    if (value === null || value === undefined) {
+        return ''
+    }
+    if (typeof value === 'string') {
+        return value.replace(/<[^>]*>?/g, '')
+    }
+    return String(value)
+}
+
 export const DocTypeLinkRenderer = ({ doctype, docname }: { doctype: string, docname: string }) => {
 
     const { data, error, isLoading } = useDoctypePreview(doctype, docname);
@@ -60,11 +70,11 @@ const DocTypeCard = memo(({
         if (!data) return { previewFields: [], allFields: [] }
         const fieldsToRemove = ['preview_image', 'preview_title', 'id', 'raven_document_link'];
 
-        const allFields = Object.entries(Object.keys(data)?.reduce((acc, key) => {
+        const allFields = Object.entries(Object.keys(data).reduce((acc, key) => {
             if (!fieldsToRemove.includes(key)) {
-                acc[key as keyof typeof data] = data[key]?.replace(/<[^>]*>?/g, '');
+                acc[key as keyof typeof data] = formatPreviewFieldValue(data[key])
             }
-            return acc;
+            return acc
         }, {} as Record<string, any>))
 
         const primaryFields = allFields.slice(0, 3);

@@ -50,12 +50,18 @@ export default function MessageReactions({ message, longPressGesture }: MessageR
     }, [message, reactToMessage])
 
     const reactions: ReactionObject[] = useMemo(() => {
-        const parsed_json = JSON.parse(message_reactions ?? '{}') as Record<string, ReactionObject>
-        return Object.entries(parsed_json).map(([key, value]) => ({
-            ...value,
-            emoji_name: key
-        }))
-
+        try {
+            const parsed_json = JSON.parse(message_reactions ?? '{}') as Record<string, Partial<ReactionObject>>
+            return Object.entries(parsed_json).map(([key, value]) => ({
+                reaction: value?.reaction ?? key,
+                users: Array.isArray(value?.users) ? value.users : [],
+                count: typeof value?.count === 'number' ? value.count : (Array.isArray(value?.users) ? value.users.length : 0),
+                is_custom: value?.is_custom,
+                emoji_name: key,
+            }))
+        } catch {
+            return []
+        }
     }, [message_reactions])
 
     const reactionsSheetRef = useSheetRef()
@@ -98,7 +104,8 @@ interface ReactionButtonProps {
 const ReactionButton = ({ reaction, currentUser, saveReaction, onLongPress, longPressGesture }: ReactionButtonProps) => {
 
     const { currentUserReacted } = useMemo(() => {
-        return { currentUserReacted: reaction.users.includes(currentUser ?? "") }
+        const users = Array.isArray(reaction.users) ? reaction.users : []
+        return { currentUserReacted: users.includes(currentUser ?? "") }
     }, [currentUser, reaction])
 
     const onReact = useCallback(() => {

@@ -45,7 +45,10 @@ const ThreadsList = ({ aiThreads, content, channel, endpoint = "raven.api.thread
     const { data: unreadThreads } = useUnreadThreadsCount()
 
     const unreadThreadsMap = useMemo(() => {
-        return unreadThreads?.message?.reduce((acc, thread) => {
+        if (!Array.isArray(unreadThreads?.message)) {
+            return {} as Record<string, number>
+        }
+        return unreadThreads.message.reduce((acc, thread) => {
             acc[thread.name] = thread.unread_count
             return acc
         }, {} as Record<string, number>)
