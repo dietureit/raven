@@ -88,7 +88,8 @@ const PollOption = ({ data, option, showVoteNumber }: { data: Poll; option: Rave
     const percentage = useMemo(() => {
         const getPercentage = (votes: number) => {
             if (data.poll.is_multi_choice) {
-                const totalVotes = data.poll.options?.reduce((acc, opt) => acc + (opt.votes ?? 0), 0)
+                const options = Array.isArray(data.poll.options) ? data.poll.options : []
+                const totalVotes = options.reduce((acc, opt) => acc + (opt.votes ?? 0), 0)
                 return totalVotes ? (votes / totalVotes) * 100 : 0
             }
             return data.poll.total_votes ? (votes / data.poll.total_votes) * 100 : 0
@@ -127,12 +128,13 @@ const PollOption = ({ data, option, showVoteNumber }: { data: Poll; option: Rave
 
 const PollResults = ({ data }: { data: Poll }) => {
     const [showVoteNumber, setShowVoteNumber] = useState(false)
+    const options = Array.isArray(data.poll.options) ? data.poll.options : []
     const toggleVoteNumber = () => {
         setShowVoteNumber(!showVoteNumber)
     }
     return (
         <Pressable className="w-full" onPress={toggleVoteNumber}>
-            {data.poll.options.map((option) => (
+            {options.map((option) => (
                 <PollOption key={option.name} data={data} option={option} showVoteNumber={showVoteNumber} />
             ))}
             <Text className="pl-2 text-sm font-medium text-muted-foreground">
@@ -146,6 +148,7 @@ const SingleChoicePoll = ({ data, messageID }: { data: Poll; messageID: string }
 
     const { call } = useFrappePostCall('raven.api.raven_poll.add_vote')
     const [selectedOption, setSelectedOption] = useState<string | null>(null)
+    const options = Array.isArray(data.poll.options) ? data.poll.options : []
 
     const onVoteSubmit = async (option: RavenPollOption) => {
         return call({
@@ -167,7 +170,7 @@ const SingleChoicePoll = ({ data, messageID }: { data: Poll; messageID: string }
 
     return (
         <View className="gap-1">
-            {data.poll.options.map((option) => (
+            {options.map((option) => (
                 <Pressable
                     key={option.name}
                     onPress={() => handleOptionSelect(option)}
@@ -190,6 +193,7 @@ const MultiChoicePoll = ({ data, messageID }: { data: Poll; messageID: string })
 
     const [selectedOptions, setSelectedOptions] = useState<string[]>([])
     const { call } = useFrappePostCall('raven.api.raven_poll.add_vote')
+    const options = Array.isArray(data.poll.options) ? data.poll.options : []
 
     const handleCheckboxChange = (name: string, value: boolean | string) => {
         if (value) {
@@ -213,7 +217,7 @@ const MultiChoicePoll = ({ data, messageID }: { data: Poll; messageID: string })
     return (
         <View className="gap-3">
             <View>
-                {data.poll.options.map((option) => (
+                {options.map((option) => (
                     <Pressable
                         key={option.name}
                         onPress={() => {

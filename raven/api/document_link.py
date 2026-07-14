@@ -3,6 +3,8 @@ from frappe.desk.utils import slug
 from frappe.model import no_value_fields, table_fields
 from frappe.utils import get_url
 
+from raven.utils.mobile_compat import as_mobile_string, sanitize_preview_data
+
 
 def get_new_app_document_links(doctype, docname):
 	"""
@@ -70,21 +72,19 @@ def get_preview_data(doctype: str, docname: str | int):
 	preview_data = preview_data[0]
 
 	formatted_preview_data = {
-		"preview_image": preview_data.get(image_field),
-		"preview_title": preview_data.get(title_field),
-		"id": preview_data.get("name"),
-		"raven_document_link": get(doctype, docname),
+		"preview_image": as_mobile_string(preview_data.get(image_field)),
+		"preview_title": as_mobile_string(preview_data.get(title_field)),
+		"id": as_mobile_string(preview_data.get("name")),
+		"raven_document_link": as_mobile_string(get(doctype, docname)),
 	}
 
 	for key, val in preview_data.items():
-		if val and meta.has_field(key) and key not in [image_field, title_field, "name"]:
-			formatted_preview_data[meta.get_field(key).label] = frappe.format(
-				val,
-				meta.get_field(key).fieldtype,
-				translated=True,
+		if val is not None and val != "" and meta.has_field(key) and key not in [image_field, title_field, "name"]:
+			formatted_preview_data[meta.get_field(key).label] = as_mobile_string(
+				frappe.format(val, meta.get_field(key).fieldtype, translated=True)
 			)
 
-	return formatted_preview_data
+	return sanitize_preview_data(formatted_preview_data)
 
 
 @frappe.whitelist(methods=["POST"])

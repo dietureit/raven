@@ -12,6 +12,7 @@ from pytz import timezone, utc
 
 from raven.ai.ai import handle_ai_thread_message, handle_bot_dm
 from raven.api.raven_channel import get_peer_user
+from raven.utils.mobile_compat import as_mobile_string, sanitize_message_for_mobile
 from raven.notification import (
 	send_notification_for_message,
 	send_notification_to_topic,
@@ -283,9 +284,9 @@ class RavenMessage(Document):
 		message_details = json.dumps(
 			{
 				"message_id": self.name,
-				"content": self.content,
+				"content": as_mobile_string(self.content),
 				"message_type": self.message_type,
-				"owner": self.owner,
+				"owner": self.bot if self.is_bot_message and self.bot else self.owner,
 				"is_bot_message": self.is_bot_message,
 				"bot": self.bot,
 			}
@@ -581,7 +582,8 @@ class RavenMessage(Document):
 					"channel_id": self.channel_id,
 					"sender": frappe.session.user,
 					"message_id": self.name,
-					"message_details": {
+					"message_details": sanitize_message_for_mobile(
+						{
 						"text": self.text,
 						"content": self.content,
 						"channel_id": self.channel_id,
@@ -602,7 +604,8 @@ class RavenMessage(Document):
 						"bot": self.bot,
 						"hide_link_preview": self.hide_link_preview,
 						"blurhash": self.blurhash,
-					},
+						}
+					),
 				},
 				doctype="Raven Channel",
 				# Adding this to automatically add the room for the event via Frappe
@@ -626,7 +629,8 @@ class RavenMessage(Document):
 					"channel_id": self.channel_id,
 					"sender": frappe.session.user,
 					"message_id": self.name,
-					"message_details": {
+					"message_details": sanitize_message_for_mobile(
+						{
 						"text": self.text,
 						"channel_id": self.channel_id,
 						"content": self.content,
@@ -656,7 +660,8 @@ class RavenMessage(Document):
 						"bot": self.bot,
 						"hide_link_preview": self.hide_link_preview,
 						"blurhash": self.blurhash,
-					},
+						}
+					),
 				},
 				doctype="Raven Channel",
 				# Adding this to automatically add the room for the event via Frappe

@@ -35,7 +35,7 @@ const MessageItem = memo(({ message }: Props) => {
 
     const { linked_message, replied_message_details } = message
 
-    const username = message.bot || message.owner
+    const username = (message.is_bot_message && message.bot) ? message.bot : (message.bot || message.owner)
 
     const user = useGetUser(username)
 
@@ -107,7 +107,7 @@ const MessageItem = memo(({ message }: Props) => {
                     <MessageAvatar
                         userFullName={userFullName}
                         userImage={user?.user_image}
-                        isBot={!!message.bot}
+                        isBot={!!(message.is_bot_message && message.bot) || !!message.bot}
                         userID={message.owner}
                         botID={message.bot}
                         is_continuation={message.is_continuation}

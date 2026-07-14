@@ -135,15 +135,21 @@ const useChatStream = (channelID: string, listRef?: React.RefObject<LegendListRe
 
                     const newMessages = [...existingMessages]
                     if (event.message_details) {
+                        const messageDetails = {
+                            ...event.message_details,
+                            name: event.message_details.name || event.message_id,
+                            is_continuation: event.message_details.is_continuation ?? 0,
+                            hide_link_preview: event.message_details.hide_link_preview ?? 0,
+                        }
                         // Check if the message is already present in the messages array
-                        const messageIndex = existingMessages.findIndex(message => message.name === event.message_details.name)
+                        const messageIndex = existingMessages.findIndex(message => message.name === messageDetails.name)
 
                         if (messageIndex !== -1) {
                             // If the message is already present, update the message
-                            newMessages[messageIndex] = event.message_details
+                            newMessages[messageIndex] = messageDetails
                         } else {
                             // If the message is not present, add the message to the array
-                            newMessages.push(event.message_details)
+                            newMessages.push(messageDetails)
                         }
                     }
 

@@ -33,8 +33,11 @@ const DMRow = ({ dm }: { dm: DMChannelWithUnreadCount }) => {
         let lastMessageContent = ''
         if (dm.last_message_details) {
             try {
-                const parsedDetails = JSON.parse(dm.last_message_details)
-                isSentByUser = parsedDetails.owner === myProfile?.name
+                const parsedDetails = typeof dm.last_message_details === 'string'
+                    ? JSON.parse(dm.last_message_details)
+                    : dm.last_message_details
+                const sender = parsedDetails.is_bot_message ? parsedDetails.bot : parsedDetails.owner
+                isSentByUser = sender === myProfile?.name
                 lastMessageContent = parsedDetails.content?.trim() || ''
             } catch (e) {
                 console.error('Error parsing last_message_details:', e)

@@ -18,12 +18,17 @@ type ReplyMessageBoxProps = ViewProps & {
 const ReplyMessageBox = ({ message, onPress }: ReplyMessageBoxProps) => {
 
     const replyMessageDetails = useMemo(() => {
-        if (typeof message.replied_message_details === 'string') {
-            return JSON.parse(message.replied_message_details)
-        } else {
+        try {
+            if (typeof message.replied_message_details === 'string') {
+                return JSON.parse(message.replied_message_details)
+            }
             return message.replied_message_details
+        } catch {
+            return null
         }
     }, [message])
+
+    if (!replyMessageDetails) return null
 
     const user = useGetUser(replyMessageDetails.bot || replyMessageDetails.owner)
 
