@@ -12,7 +12,7 @@ from pytz import timezone, utc
 
 from raven.ai.ai import handle_ai_thread_message, handle_bot_dm
 from raven.api.raven_channel import get_peer_user
-from raven.utils.mobile_compat import as_mobile_string, sanitize_message_for_mobile
+from raven.utils import as_mobile_string, sanitize_message_for_mobile
 from raven.notification import (
 	send_notification_for_message,
 	send_notification_to_topic,

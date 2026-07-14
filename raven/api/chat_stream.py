@@ -4,8 +4,7 @@ import frappe
 from frappe import _
 from frappe.query_builder import Order
 
-from raven.utils import track_channel_visit
-from raven.utils.mobile_compat import sanitize_messages_for_mobile
+from raven.utils import sanitize_messages_for_mobile, track_channel_visit
 
 
 @frappe.whitelist()
