@@ -3,7 +3,7 @@ from frappe.desk.utils import slug
 from frappe.model import no_value_fields, table_fields
 from frappe.utils import get_url
 
-from raven.utils.mobile_compat import as_mobile_string, sanitize_preview_data
+from raven.utils import as_mobile_string, sanitize_preview_data
 
 
 def get_new_app_document_links(doctype, docname):
