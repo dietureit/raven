@@ -394,15 +394,15 @@ def raven_channel_query(user):
 	escaped_user = frappe.db.escape(user)
 
 	# Used when desk list views join linked Raven Channel rows (e.g. Raven Message list).
-	# Do not rely only on `owner` — some sites are missing that column on Raven Channel.
+	# Field refs must use `tabDoctype`.`field` so Frappe can swap in the JOIN alias.
 	member_channels = (
-		f"`tabRaven Channel`.name IN ("
+		f"`tabRaven Channel`.`name` IN ("
 		f"SELECT `channel_id` FROM `tabRaven Channel Member` WHERE `user_id` = {escaped_user}"
 		f")"
 	)
 
 	if frappe.db.has_column("Raven Channel", "owner"):
-		return f"({member_channels} OR `tabRaven Channel`.owner = {escaped_user})"
+		return f"({member_channels} OR `tabRaven Channel`.`owner` = {escaped_user})"
 
 	return member_channels
 
