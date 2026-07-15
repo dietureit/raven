@@ -1242,3 +1242,10 @@ class TestPermissions(IntegrationTestCase):
 
 		with self.assertRaises(frappe.PermissionError):
 			test1_message.delete()
+
+	def test_raven_channel_query_uses_join_alias_format(self):
+		from raven.permissions import raven_channel_query
+
+		condition = raven_channel_query("test@example.com")
+		self.assertIn("`tabRaven Channel`.`name`", condition)
+		self.assertNotIn("`tabRaven Channel`.name", condition)
